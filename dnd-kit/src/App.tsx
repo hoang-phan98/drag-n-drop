@@ -1,24 +1,31 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { useState } from "react";
+
+import { DndContext, DragEndEvent } from "@dnd-kit/core";
+import { Draggable } from "./Draggable";
+import { Droppable } from "./Droppable";
+
+import "./App.css";
 
 function App() {
+  const [isDropped, setIsDropped] = useState(false);
+  const draggableMarkup = <Draggable>Drag me</Draggable>;
+
+  function handleDragEnd(event: DragEndEvent) {
+    if (event.over && event.over.id === "droppable") {
+      setIsDropped(true);
+    }
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="app">
+      <header className="app-header"></header>
+
+      <div className="demo">
+        <DndContext onDragEnd={handleDragEnd}>
+          {!isDropped ? draggableMarkup : null}
+          <Droppable>{isDropped ? draggableMarkup : "Drop here"}</Droppable>
+        </DndContext>
+      </div>
     </div>
   );
 }
