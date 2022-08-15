@@ -1,0 +1,8 @@
+.droppable-zone {
+  height: 10rem;
+  background-color: green;
+}
+
+.is-over {
+  height: 20rem;
+}

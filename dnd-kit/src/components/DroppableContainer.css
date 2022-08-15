@@ -1,0 +1,8 @@
+.droppable-a-container,
+.droppable-b-container {
+  height: 90vh;
+}
+
+.droppable-b-container {
+  width: 100%;
+}
