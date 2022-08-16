@@ -5,6 +5,7 @@ import { DroppableContainerA } from "./DroppableContainerA";
 import { DroppableContainerB } from "./DroppableContainerB";
 import { DroppableZone } from "./DroppableZone";
 import { ItemProps } from "./Item";
+import { ItemList } from "./ItemList";
 import { ItemType } from "./models/ItemType";
 
 import "./Playground.css";
@@ -48,6 +49,7 @@ export const Playground = () => {
       setActiveItem(_activeItem);
 
       if (_activeItem.type === ItemType.Attribute) {
+        // Dropping attribute items we should add a new droppable zone to each droppable Hierarchy/Root/Leaf dropzones below it
       } else {
         // Assuming we're dropping Hierarchy/Root/Leaf nodes
         const isFound = droppableZones.filter((dZone) =>
@@ -152,31 +154,18 @@ export const Playground = () => {
     <div className="playground">
       <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <DroppableContainerA>
-          <h2 className="subheading">Hierarchy</h2>
-          <ul className="items-list">
-            {items
-              .filter((item) => !item.type.includes(ItemType.Attribute))
-              .map((item, itemIndex) => {
-                return (
-                  <li key={itemIndex}>
-                    <DraggableItem item={item} />
-                  </li>
-                );
-              })}
-          </ul>
-          <h2 className="subheading">Attributes</h2>
-          <ul className="items-list">
-            {" "}
-            {items
-              .filter((item) => item.type.includes(ItemType.Attribute))
-              .map((item, itemIndex) => {
-                return (
-                  <li key={itemIndex}>
-                    <DraggableItem item={item} />
-                  </li>
-                );
-              })}
-          </ul>
+          <ItemList
+            heading={"Hierarchies"}
+            items={items.filter(
+              (item) => !item.type.includes(ItemType.Attribute)
+            )}
+          />
+          <ItemList
+            heading={"Attributes"}
+            items={items.filter((item) =>
+              item.type.includes(ItemType.Attribute)
+            )}
+          />
         </DroppableContainerA>
         <DroppableContainerB>
           {droppableZones.map((dZone, dZoneIndex) => {
