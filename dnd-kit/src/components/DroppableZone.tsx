@@ -33,7 +33,8 @@ export const DroppableZone = ({
         "droppable-zone",
         `${zone.id}`,
         validDropLocation && "valid",
-        isOver && validDropLocation && "is-over"
+        isOver && validDropLocation && "is-over",
+        { "with-children": zone.items.length > 0 }
       )}
       ref={setNodeRef}
     >

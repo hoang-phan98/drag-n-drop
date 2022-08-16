@@ -11,6 +11,7 @@
   height: 2rem;
 }
 
-.droppable-segment-zone.valid {
-  background-color: green;
+.droppable-zone.with-children {
+  display: flex;
+  height: auto;
 }

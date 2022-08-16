@@ -20,6 +20,12 @@ export const Playground = () => {
 
   const [items, updateItems] = useState<ItemProps[]>([
     {
+      id: "draggable-segment-item",
+      name: "Segment",
+      type: ItemType.Hierarchy,
+      ordinal: 90,
+    },
+    {
       id: "draggable-product-item",
       name: "Product",
       type: ItemType.Leaf,
@@ -36,32 +42,29 @@ export const Playground = () => {
       const _activeItem = active.data.current as ItemProps;
       setActiveItem(_activeItem);
 
-      // If no droppable zones
-      if (droppableZones.length === 0) {
+      const isFound = droppableZones.filter((dZone) =>
+        dZone.types.includes(_activeItem.type)
+      );
+
+      // When no matching zones were found add one
+      // TODO probably should take into account where we want to inject the new zone based on ordinal
+      if (isFound.length === 0) {
         updateDroppableZones([
+          ...droppableZones,
           {
-            id: "droppable-product-zone",
-            types: [ItemType.Leaf],
+            id: `droppable-${_activeItem.name.toLowerCase()}-zone`,
+            types: [_activeItem.type],
             items: [],
           },
         ]);
       } else {
-        // When there's other zones
-        const isFound = droppableZones.filter((dZone) =>
-          dZone.types.includes(_activeItem.type)
-        );
-
-        // When no matching zones were found add one
-        if (isFound.length === 0) {
-          updateDroppableZones([
-            ...droppableZones,
-            {
-              id: `droppable-${_activeItem.name.toLowerCase()}-zone`,
-              types: [_activeItem.type],
-              items: [],
-            },
-          ]);
-        }
+        updateDroppableZones([
+          {
+            id: `droppable-${_activeItem.name.toLowerCase()}-zone`,
+            types: [_activeItem.type],
+            items: [],
+          },
+        ]);
       }
     }
   }
