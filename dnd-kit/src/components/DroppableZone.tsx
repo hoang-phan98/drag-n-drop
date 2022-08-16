@@ -1,10 +1,11 @@
 import { ReactNode } from "react";
 import { useDroppable } from "@dnd-kit/core";
-import { Zone } from "./Playground";
+import { Item, Zone } from "./Playground";
 import classNames from "classnames";
 
 import "./DroppableZone.css";
 import { ItemType } from "./models/ItemType";
+import { RemovableItem } from "./RemovableItem";
 export interface DroppableZoneProps {
   zone: Zone;
   types: ItemType[];
@@ -35,7 +36,17 @@ export const DroppableZone = ({
       )}
       ref={setNodeRef}
     >
-      {children}
+      {zone.items.map((item, itemIndex) => {
+        return (
+          <RemovableItem
+            key={itemIndex}
+            item={item}
+            onRemove={(item: Item) => {
+              console.log("Remove something", item.name);
+            }}
+          />
+        );
+      })}
     </div>
   );
 };

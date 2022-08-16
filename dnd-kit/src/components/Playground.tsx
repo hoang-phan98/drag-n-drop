@@ -1,5 +1,5 @@
 import { DndContext, DragEndEvent, DragStartEvent } from "@dnd-kit/core";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { DraggableItem } from "./DraggableItem";
 import { DroppableContainerA } from "./DroppableContainerA";
 import { DroppableContainerB } from "./DroppableContainerB";
@@ -7,6 +7,7 @@ import { DroppableZone } from "./DroppableZone";
 import { ItemType } from "./models/ItemType";
 
 import "./Playground.css";
+import { RemovableItem } from "./RemovableItem";
 
 export interface Item {
   id: string;
@@ -18,12 +19,13 @@ export interface Item {
 export interface Zone {
   id: string;
   types: ItemType[];
+  items: Item[];
 }
 
 export const Playground = () => {
   const [activeItem, setActiveItem] = useState<Item | null>(null);
 
-  const [draggableItems, updateDraggableItems] = useState<Item[]>([
+  const [items, updateItems] = useState<Item[]>([
     {
       id: "draggable-product-item",
       name: "Product",
@@ -36,6 +38,7 @@ export const Playground = () => {
     {
       id: "droppable-segment-zone",
       types: [ItemType.Hierarchy],
+      items: [],
     },
   ]);
 
@@ -51,14 +54,38 @@ export const Playground = () => {
       if (isFound.length === 0) {
         updateDroppableZones([
           ...droppableZones,
-          { id: "droppable-product-zone", types: [ItemType.Leaf] },
+          { id: "droppable-product-zone", types: [ItemType.Leaf], items: [] },
         ]);
       }
     }
   }
 
   function handleDragEnd(event: DragEndEvent) {
-    setActiveItem(null);
+    const { active, over } = event;
+    if (active && over) {
+      // Adding item into the dropzone items list
+      const foundZone = droppableZones.find((dZone) => dZone.id === over.id);
+      if (foundZone) {
+        const newDroppableZones = droppableZones.filter(
+          (dZone) => dZone.id === over.id
+        );
+
+        const newDroppedZone = {
+          ...foundZone,
+          items: [...foundZone.items, active.data.current as Item],
+        };
+        updateDroppableZones([...newDroppableZones, newDroppedZone]);
+
+        // Removing item from items list
+        const newDraggableItemsList = items.filter(
+          (dItem) => dItem.id !== active.id
+        );
+        updateItems([...newDraggableItemsList]);
+
+        // Update activeItem to nothing
+        setActiveItem(null);
+      }
+    }
   }
 
   return (
@@ -66,10 +93,10 @@ export const Playground = () => {
       <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <DroppableContainerA>
           <ul className="items-list">
-            {draggableItems.map((dItem, dItemIndex) => {
+            {items.map((item, itemIndex) => {
               return (
-                <li key={dItemIndex} className="item">
-                  <DraggableItem item={dItem} />
+                <li key={itemIndex} className="item">
+                  <DraggableItem item={item} />
                 </li>
               );
             })}
