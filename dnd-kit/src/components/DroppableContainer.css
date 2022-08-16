@@ -5,4 +5,5 @@
 
 .droppable-b-container {
   width: 100%;
+  border: 1px solid #a9a9a9;
 }

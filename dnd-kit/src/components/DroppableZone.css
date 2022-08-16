@@ -1,8 +1,16 @@
 .droppable-zone {
-  height: 10rem;
-  background-color: green;
+  height: 0.5rem;
+  width: 23rem;
+}
+
+.droppable-zone.valid {
+  background-color: blue;
 }
 
 .is-over {
-  height: 20rem;
+  height: 2rem;
+}
+
+.droppable-segment-zone.valid {
+  background-color: green;
 }
