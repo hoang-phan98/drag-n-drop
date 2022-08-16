@@ -8,15 +8,12 @@ export interface DroppableContainerAProps {
 }
 
 export const DroppableContainerA = ({ children }: DroppableContainerAProps) => {
-  const { isOver, setNodeRef } = useDroppable({
+  const { setNodeRef } = useDroppable({
     id: "droppable-a",
   });
-  const style = {
-    color: isOver ? "blue" : undefined,
-  };
 
   return (
-    <div className="droppable-a-container" ref={setNodeRef} style={style}>
+    <div className="droppable-a-container" ref={setNodeRef}>
       {children}
     </div>
   );

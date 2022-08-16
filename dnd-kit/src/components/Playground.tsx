@@ -152,14 +152,30 @@ export const Playground = () => {
     <div className="playground">
       <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <DroppableContainerA>
+          <h2 className="subheading">Hierarchy</h2>
           <ul className="items-list">
-            {items.map((item, itemIndex) => {
-              return (
-                <li key={itemIndex}>
-                  <DraggableItem item={item} />
-                </li>
-              );
-            })}
+            {items
+              .filter((item) => !item.type.includes(ItemType.Attribute))
+              .map((item, itemIndex) => {
+                return (
+                  <li key={itemIndex}>
+                    <DraggableItem item={item} />
+                  </li>
+                );
+              })}
+          </ul>
+          <h2 className="subheading">Attributes</h2>
+          <ul className="items-list">
+            {" "}
+            {items
+              .filter((item) => item.type.includes(ItemType.Attribute))
+              .map((item, itemIndex) => {
+                return (
+                  <li key={itemIndex}>
+                    <DraggableItem item={item} />
+                  </li>
+                );
+              })}
           </ul>
         </DroppableContainerA>
         <DroppableContainerB>
