@@ -9,6 +9,6 @@
 .removable-item-btn {
   background: #fff;
   border: none;
-  height: 100%;
   width: 2rem;
+  margin-bottom: 0.5rem;
 }

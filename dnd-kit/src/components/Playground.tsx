@@ -30,6 +30,12 @@ export const Playground = () => {
       type: ItemType.Leaf,
       ordinal: 100,
     },
+    {
+      id: "draggable-brand-item",
+      name: "Brand",
+      type: ItemType.Attribute,
+      ordinal: -1,
+    },
   ]);
 
   const [droppableZones, updateDroppableZones] = useState<Zone[]>([]);
@@ -41,36 +47,45 @@ export const Playground = () => {
       const _activeItem = active.data.current as ItemProps;
       setActiveItem(_activeItem);
 
-      const isFound = droppableZones.filter((dZone) =>
-        dZone.types.includes(_activeItem.type)
-      );
-
-      // When no matching zones were found add one
-      // TODO probably should take into account where we want to inject the new zone based on ordinal
-      if (isFound.length === 0) {
-        updateDroppableZones([
-          ...droppableZones,
-          {
-            id: `droppable-${_activeItem.name.toLowerCase()}-zone`,
-            types: [_activeItem.type],
-            items: [],
-          },
-        ]);
+      if (_activeItem.type === ItemType.Attribute) {
       } else {
-        updateDroppableZones([
-          {
-            id: `droppable-${_activeItem.name.toLowerCase()}-zone`,
-            types: [_activeItem.type],
-            items: [],
-          },
-        ]);
+        // Assuming we're dropping Hierarchy/Root/Leaf nodes
+        const isFound = droppableZones.filter((dZone) =>
+          dZone.types.includes(_activeItem.type)
+        );
+
+        // When no matching zones were found add one
+        // TODO probably should take into account where we want to inject the new zone based on ordinal
+        if (isFound.length === 0) {
+          updateDroppableZones([
+            ...droppableZones,
+            {
+              id: `droppable-${_activeItem.name.toLowerCase()}-zone`,
+              types: [_activeItem.type],
+              items: [],
+            },
+          ]);
+        } else {
+          updateDroppableZones([
+            {
+              id: `droppable-${_activeItem.name.toLowerCase()}-zone`,
+              types: [_activeItem.type],
+              items: [],
+            },
+          ]);
+        }
       }
     }
   }
 
   function handleDragEnd(event: DragEndEvent) {
     const { over } = event;
-    if (activeItem && over && over.data.current) {
+    if (
+      activeItem &&
+      over &&
+      over.data.current &&
+      over.data.current.accepts.includes(activeItem.type)
+    ) {
       // Adding item into the dropzone items list
       const foundZone = droppableZones.find((dZone) => dZone.id === over.id);
 
