@@ -70,8 +70,7 @@ export const Playground = () => {
 
   function handleDragEnd(event: DragEndEvent) {
     const { over } = event;
-
-    if (activeItem && over) {
+    if (activeItem && over && over.data.current) {
       // Adding item into the dropzone items list
       const foundZone = droppableZones.find((dZone) => dZone.id === over.id);
 
@@ -99,6 +98,14 @@ export const Playground = () => {
           setActiveItem(null);
         }
       }
+    } else {
+      // This is where we are assuming item did not get dropped over the dropzones
+      setActiveItem(null);
+      // Filter out all empty zones
+      const newDroppableZones = droppableZones.filter(
+        (dZone) => dZone.items.length !== 0
+      );
+      updateDroppableZones(newDroppableZones);
     }
   }
 
@@ -129,6 +136,7 @@ export const Playground = () => {
     }
   }
 
+  // NOTE: have tried using onDragMove, onDragOver and onDragCancel which didn't seemed to be useful
   return (
     <div className="playground">
       <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
