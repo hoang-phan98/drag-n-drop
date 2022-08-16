@@ -1,8 +1,8 @@
 import { useDraggable } from "@dnd-kit/core";
-import { Item } from "./Playground";
+import { Item, ItemProps } from "./Item";
 
 export interface DraggableItemProps {
-  item: Item;
+  item: ItemProps;
 }
 
 export const DraggableItem = ({ item }: DraggableItemProps) => {
@@ -19,8 +19,8 @@ export const DraggableItem = ({ item }: DraggableItemProps) => {
     : undefined;
 
   return (
-    <button ref={setNodeRef} style={style} {...listeners} {...attributes}>
-      {item.name}
-    </button>
+    <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
+      <Item {...item} />
+    </div>
   );
 };

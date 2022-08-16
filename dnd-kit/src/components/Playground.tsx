@@ -4,28 +4,21 @@ import { DraggableItem } from "./DraggableItem";
 import { DroppableContainerA } from "./DroppableContainerA";
 import { DroppableContainerB } from "./DroppableContainerB";
 import { DroppableZone } from "./DroppableZone";
+import { ItemProps } from "./Item";
 import { ItemType } from "./models/ItemType";
 
 import "./Playground.css";
 import { RemovableItem } from "./RemovableItem";
-
-export interface Item {
-  id: string;
-  name: string;
-  type: ItemType;
-  ordinal: number;
-}
-
 export interface Zone {
   id: string;
   types: ItemType[];
-  items: Item[];
+  items: ItemProps[];
 }
 
 export const Playground = () => {
-  const [activeItem, setActiveItem] = useState<Item | null>(null);
+  const [activeItem, setActiveItem] = useState<ItemProps | null>(null);
 
-  const [items, updateItems] = useState<Item[]>([
+  const [items, updateItems] = useState<ItemProps[]>([
     {
       id: "draggable-product-item",
       name: "Product",
@@ -44,7 +37,7 @@ export const Playground = () => {
 
   function handleDragStart(event: DragStartEvent) {
     const { active } = event;
-    setActiveItem(active.data.current as Item);
+    setActiveItem(active.data.current as ItemProps);
 
     if (active.data.current && active.data.current.type === ItemType.Leaf) {
       const isFound = droppableZones.filter(
@@ -72,7 +65,7 @@ export const Playground = () => {
 
         const newDroppedZone = {
           ...foundZone,
-          items: [...foundZone.items, active.data.current as Item],
+          items: [...foundZone.items, active.data.current as ItemProps],
         };
         updateDroppableZones([...newDroppableZones, newDroppedZone]);
 
@@ -95,7 +88,7 @@ export const Playground = () => {
           <ul className="items-list">
             {items.map((item, itemIndex) => {
               return (
-                <li key={itemIndex} className="item">
+                <li key={itemIndex}>
                   <DraggableItem item={item} />
                 </li>
               );

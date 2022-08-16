@@ -1,0 +1,11 @@
+.item {
+  border: 1px solid #c3c3c3;
+  border-radius: 3px;
+  width: 194px;
+  height: 32px;
+  line-height: 27px;
+  text-align: left;
+  padding: 3px 9px;
+  color: #646464;
+  background-color: white;
+}

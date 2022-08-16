@@ -1,9 +1,19 @@
 .droppable-a-container,
 .droppable-b-container {
   height: 90vh;
+  border: 1px solid #e0e0e0;
+  border-radius: 3px 0px 0px 3px;
+}
+
+.droppable-a-container {
+  border-right: none;
 }
 
 .droppable-b-container {
   width: 100%;
-  border: 1px solid #a9a9a9;
+  border: 1px solid #e0e0e0;
+  background: white;
+  background-image: radial-gradient(#8baaff 1px, transparent 0);
+  background-size: 20px 20px;
+  background-position: -19px -19px;
 }

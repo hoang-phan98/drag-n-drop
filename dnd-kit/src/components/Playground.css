@@ -1,6 +1,11 @@
 .playground {
   display: flex;
   flex-direction: row;
+  padding: 0 2rem;
+}
+
+.playground > * {
+  box-sizing: border-box;
 }
 
 .items-list {
@@ -8,9 +13,4 @@
   margin: 0;
   padding: 0 2rem;
   width: 20rem;
-}
-
-.item,
-.item button {
-  width: 100%;
 }
