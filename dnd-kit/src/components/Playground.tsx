@@ -1,5 +1,5 @@
 import { DndContext, DragEndEvent, DragStartEvent } from "@dnd-kit/core";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { DraggableItem } from "./DraggableItem";
 import { DroppableContainerA } from "./DroppableContainerA";
 import { DroppableContainerB } from "./DroppableContainerB";
@@ -27,56 +27,75 @@ export const Playground = () => {
     },
   ]);
 
-  const [droppableZones, updateDroppableZones] = useState<Zone[]>([
-    {
-      id: "droppable-segment-zone",
-      types: [ItemType.Hierarchy],
-      items: [],
-    },
-  ]);
+  const [droppableZones, updateDroppableZones] = useState<Zone[]>([]);
 
   function handleDragStart(event: DragStartEvent) {
     const { active } = event;
-    setActiveItem(active.data.current as ItemProps);
 
-    if (active.data.current && active.data.current.type === ItemType.Leaf) {
-      const isFound = droppableZones.filter(
-        (dZone) => dZone.id === "droppable-product-zone"
-      );
+    if (active && active.data && active.data.current) {
+      const _activeItem = active.data.current as ItemProps;
+      setActiveItem(_activeItem);
 
-      if (isFound.length === 0) {
+      // If no droppable zones
+      if (droppableZones.length === 0) {
         updateDroppableZones([
-          ...droppableZones,
-          { id: "droppable-product-zone", types: [ItemType.Leaf], items: [] },
+          {
+            id: "droppable-product-zone",
+            types: [ItemType.Leaf],
+            items: [],
+          },
         ]);
+      } else {
+        // When there's other zones
+        const isFound = droppableZones.filter((dZone) =>
+          dZone.types.includes(_activeItem.type)
+        );
+
+        // When no matching zones were found add one
+        if (isFound.length === 0) {
+          updateDroppableZones([
+            ...droppableZones,
+            {
+              id: `droppable-${_activeItem.name.toLowerCase()}-zone`,
+              types: [_activeItem.type],
+              items: [],
+            },
+          ]);
+        }
       }
     }
   }
 
   function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
-    if (active && over) {
+    const { over } = event;
+
+    if (activeItem && over) {
       // Adding item into the dropzone items list
       const foundZone = droppableZones.find((dZone) => dZone.id === over.id);
+
       if (foundZone) {
-        const newDroppableZones = droppableZones.filter(
-          (dZone) => dZone.id === over.id
-        );
+        const canDrop = foundZone.types.includes(activeItem.type);
 
-        const newDroppedZone = {
-          ...foundZone,
-          items: [...foundZone.items, active.data.current as ItemProps],
-        };
-        updateDroppableZones([...newDroppableZones, newDroppedZone]);
+        if (canDrop) {
+          const newDroppableZones = droppableZones.filter(
+            (dZone) => dZone.id !== over.id
+          );
 
-        // Removing item from items list
-        const newDraggableItemsList = items.filter(
-          (dItem) => dItem.id !== active.id
-        );
-        updateItems([...newDraggableItemsList]);
+          const newDroppedZone = {
+            ...foundZone,
+            items: [...foundZone.items, activeItem],
+          };
+          updateDroppableZones([...newDroppableZones, newDroppedZone]);
 
-        // Update activeItem to nothing
-        setActiveItem(null);
+          // Removing item from items list
+          const newDraggableItemsList = items.filter(
+            (dItem) => dItem.id !== activeItem.id
+          );
+          updateItems([...newDraggableItemsList]);
+
+          // Update activeItem to nothing
+          setActiveItem(null);
+        }
       }
     }
   }
@@ -91,13 +110,18 @@ export const Playground = () => {
         (foundZoneItem) => foundZoneItem.id !== item.id
       );
 
-      const newZone = {
-        ...foundZone,
-        items: [...newItems],
-      };
-
-      const newZones = droppableZones.filter((dZone) => dZone.id !== zone.id);
-      updateDroppableZones([...newZones, newZone]);
+      if (newItems.length === 0) {
+        //empty children, then remove parent
+        const newZones = droppableZones.filter((dZone) => dZone.id !== zone.id);
+        updateDroppableZones([...newZones]);
+      } else {
+        const newZone = {
+          ...foundZone,
+          items: [...newItems],
+        };
+        const newZones = droppableZones.filter((dZone) => dZone.id !== zone.id);
+        updateDroppableZones([...newZones, newZone]);
+      }
 
       updateItems([...items, item]);
     }
@@ -119,9 +143,10 @@ export const Playground = () => {
         </DroppableContainerA>
         <DroppableContainerB>
           {droppableZones.map((dZone, dZoneIndex) => {
-            const canDrop = activeItem
-              ? dZone.types.includes(activeItem.type)
-              : false;
+            const canDrop =
+              activeItem && activeItem.type
+                ? dZone.types.includes(activeItem.type)
+                : false;
 
             return (
               <DroppableZone
