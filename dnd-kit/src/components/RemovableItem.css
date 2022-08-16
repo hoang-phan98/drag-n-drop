@@ -1,0 +1,14 @@
+.removable-item {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 14rem;
+}
+
+.removable-item-btn {
+  background: #fff;
+  border: none;
+  height: 100%;
+  width: 2rem;
+}

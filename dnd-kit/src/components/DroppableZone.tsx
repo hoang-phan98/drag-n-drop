@@ -11,14 +11,14 @@ export interface DroppableZoneProps {
   zone: Zone;
   types: ItemType[];
   validDropLocation: boolean;
-  children?: ReactNode;
+  onRemove: (item: ItemProps, zone: Zone) => void;
 }
 
 export const DroppableZone = ({
   zone,
   types,
   validDropLocation,
-  children,
+  onRemove,
 }: DroppableZoneProps) => {
   const { isOver, setNodeRef } = useDroppable({
     id: zone.id,
@@ -42,8 +42,8 @@ export const DroppableZone = ({
           <RemovableItem
             key={itemIndex}
             item={item}
-            onRemove={(item: ItemProps) => {
-              console.log("Remove something", item.name);
+            onRemove={(item) => {
+              onRemove(item, zone);
             }}
           />
         );

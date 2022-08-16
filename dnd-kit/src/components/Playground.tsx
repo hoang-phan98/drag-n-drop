@@ -81,6 +81,28 @@ export const Playground = () => {
     }
   }
 
+  function handleRemove(item: ItemProps, zone: Zone) {
+    // Loop through Dropzones and remove child from dropzone, if last child and not last dropzone, remove whole dropzone?
+    const foundZone = droppableZones.find((dZone) => dZone.id === zone.id);
+
+    if (foundZone) {
+      // Removed child from zone
+      const newItems = foundZone.items.filter(
+        (foundZoneItem) => foundZoneItem.id !== item.id
+      );
+
+      const newZone = {
+        ...foundZone,
+        items: [...newItems],
+      };
+
+      const newZones = droppableZones.filter((dZone) => dZone.id !== zone.id);
+      updateDroppableZones([...newZones, newZone]);
+
+      updateItems([...items, item]);
+    }
+  }
+
   return (
     <div className="playground">
       <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
@@ -107,6 +129,7 @@ export const Playground = () => {
                 zone={dZone}
                 types={dZone.types}
                 validDropLocation={canDrop}
+                onRemove={handleRemove}
               />
             );
           })}

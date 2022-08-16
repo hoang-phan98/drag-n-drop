@@ -4,13 +4,9 @@
   padding: 0 2rem;
 }
 
-.playground > * {
-  box-sizing: border-box;
-}
-
 .items-list {
   list-style: none;
   margin: 0;
-  padding: 0 2rem;
-  width: 20rem;
+  padding: 1rem;
+  width: 14rem;
 }
