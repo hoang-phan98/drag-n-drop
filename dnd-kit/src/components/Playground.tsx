@@ -1,5 +1,5 @@
 import { DndContext, DragEndEvent, DragStartEvent } from "@dnd-kit/core";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { DraggableItem } from "./DraggableItem";
 import { DroppableContainerA } from "./DroppableContainerA";
 import { DroppableContainerB } from "./DroppableContainerB";
@@ -8,7 +8,6 @@ import { ItemProps } from "./Item";
 import { ItemType } from "./models/ItemType";
 
 import "./Playground.css";
-import { RemovableItem } from "./RemovableItem";
 export interface Zone {
   id: string;
   types: ItemType[];
