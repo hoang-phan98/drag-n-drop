@@ -10,7 +10,7 @@ import { ItemType } from "./models/ItemType";
 import "./Playground.css";
 export interface Zone {
   id: string;
-  types: ItemType[];
+  accepts: ItemType[];
   items: ItemProps[];
 }
 
@@ -51,7 +51,7 @@ export const Playground = () => {
       } else {
         // Assuming we're dropping Hierarchy/Root/Leaf nodes
         const isFound = droppableZones.filter((dZone) =>
-          dZone.types.includes(_activeItem.type)
+          dZone.accepts.includes(_activeItem.type)
         );
 
         // When no matching zones were found add one
@@ -61,7 +61,7 @@ export const Playground = () => {
             ...droppableZones,
             {
               id: `droppable-${_activeItem.name.toLowerCase()}-zone`,
-              types: [_activeItem.type],
+              accepts: [_activeItem.type],
               items: [],
             },
           ]);
@@ -69,7 +69,7 @@ export const Playground = () => {
           updateDroppableZones([
             {
               id: `droppable-${_activeItem.name.toLowerCase()}-zone`,
-              types: [_activeItem.type],
+              accepts: [_activeItem.type],
               items: [],
             },
           ]);
@@ -90,28 +90,24 @@ export const Playground = () => {
       const foundZone = droppableZones.find((dZone) => dZone.id === over.id);
 
       if (foundZone) {
-        const canDrop = foundZone.types.includes(activeItem.type);
+        const newDroppableZones = droppableZones.filter(
+          (dZone) => dZone.id !== over.id
+        );
 
-        if (canDrop) {
-          const newDroppableZones = droppableZones.filter(
-            (dZone) => dZone.id !== over.id
-          );
+        const newDroppedZone = {
+          ...foundZone,
+          items: [...foundZone.items, activeItem],
+        };
+        updateDroppableZones([...newDroppableZones, newDroppedZone]);
 
-          const newDroppedZone = {
-            ...foundZone,
-            items: [...foundZone.items, activeItem],
-          };
-          updateDroppableZones([...newDroppableZones, newDroppedZone]);
+        // Removing item from items list
+        const newDraggableItemsList = items.filter(
+          (dItem) => dItem.id !== activeItem.id
+        );
+        updateItems([...newDraggableItemsList]);
 
-          // Removing item from items list
-          const newDraggableItemsList = items.filter(
-            (dItem) => dItem.id !== activeItem.id
-          );
-          updateItems([...newDraggableItemsList]);
-
-          // Update activeItem to nothing
-          setActiveItem(null);
-        }
+        // Update activeItem to nothing
+        setActiveItem(null);
       }
     } else {
       // This is where we are assuming item did not get dropped over the dropzones
@@ -170,14 +166,13 @@ export const Playground = () => {
           {droppableZones.map((dZone, dZoneIndex) => {
             const canDrop =
               activeItem && activeItem.type
-                ? dZone.types.includes(activeItem.type)
+                ? dZone.accepts.includes(activeItem.type)
                 : false;
 
             return (
               <DroppableZone
                 key={dZoneIndex}
                 zone={dZone}
-                types={dZone.types}
                 validDropLocation={canDrop}
                 onRemove={handleRemove}
               />
