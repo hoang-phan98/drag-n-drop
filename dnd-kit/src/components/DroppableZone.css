@@ -1,12 +1,12 @@
 .droppable-zone {
   height: 0.25rem;
-  width: 23rem;
   width: 12.125rem;
   border-radius: 0.188rem;
 }
 
 .droppable-zone.valid {
   background-color: #d3dcea;
+  margin-bottom: 1rem;
 }
 
 .is-over {
@@ -16,4 +16,5 @@
 .droppable-zone.with-children {
   display: flex;
   height: auto;
+  margin-bottom: 0;
 }

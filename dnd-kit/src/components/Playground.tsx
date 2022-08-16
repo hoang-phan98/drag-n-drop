@@ -1,12 +1,12 @@
 import { DndContext, DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import { useState } from "react";
-import { DraggableItem } from "./DraggableItem";
 import { DroppableContainerA } from "./DroppableContainerA";
 import { DroppableContainerB } from "./DroppableContainerB";
 import { DroppableZone } from "./DroppableZone";
 import { ItemProps } from "./Item";
 import { ItemList } from "./ItemList";
 import { ItemType } from "./models/ItemType";
+import { v4 as uuidv4 } from "uuid";
 
 import "./Playground.css";
 export interface Zone {
@@ -49,7 +49,18 @@ export const Playground = () => {
       setActiveItem(_activeItem);
 
       if (_activeItem.type === ItemType.Attribute) {
-        // Dropping attribute items we should add a new droppable zone to each droppable Hierarchy/Root/Leaf dropzones below it
+        // Dropping attribute items we should add a new droppable zone below to each dropzone in the list
+        const newDroppableZones: Zone[] = [];
+        droppableZones.forEach((dZone) => {
+          newDroppableZones.push(dZone);
+          newDroppableZones.push({
+            id: uuidv4(),
+            accepts: [_activeItem.type],
+            items: [],
+          });
+        });
+
+        updateDroppableZones([...newDroppableZones]);
       } else {
         // Assuming we're dropping Hierarchy/Root/Leaf nodes
         const isFound = droppableZones.filter((dZone) =>
@@ -90,17 +101,22 @@ export const Playground = () => {
     ) {
       // Adding item into the dropzone items list
       const foundZone = droppableZones.find((dZone) => dZone.id === over.id);
+      const foundZoneIndex = droppableZones.findIndex(
+        (dZone) => dZone.id === over.id
+      );
 
       if (foundZone) {
-        const newDroppableZones = droppableZones.filter(
-          (dZone) => dZone.id !== over.id
-        );
-
         const newDroppedZone = {
           ...foundZone,
           items: [...foundZone.items, activeItem],
         };
-        updateDroppableZones([...newDroppableZones, newDroppedZone]);
+
+        const newDroppableZones = droppableZones.filter(
+          (dZone) => dZone.id !== over.id
+        );
+        newDroppableZones.splice(foundZoneIndex, 0, newDroppedZone);
+
+        updateDroppableZones([...newDroppableZones]);
 
         // Removing item from items list
         const newDraggableItemsList = items.filter(
@@ -127,24 +143,11 @@ export const Playground = () => {
     const foundZone = droppableZones.find((dZone) => dZone.id === zone.id);
 
     if (foundZone) {
-      // Removed child from zone
-      const newItems = foundZone.items.filter(
-        (foundZoneItem) => foundZoneItem.id !== item.id
-      );
+      const newZones = droppableZones
+        .filter((dZone) => dZone.id !== zone.id)
+        .filter((dZone) => dZone.items.length !== 0);
 
-      if (newItems.length === 0) {
-        //empty children, then remove parent
-        const newZones = droppableZones.filter((dZone) => dZone.id !== zone.id);
-        updateDroppableZones([...newZones]);
-      } else {
-        const newZone = {
-          ...foundZone,
-          items: [...newItems],
-        };
-        const newZones = droppableZones.filter((dZone) => dZone.id !== zone.id);
-        updateDroppableZones([...newZones, newZone]);
-      }
-
+      updateDroppableZones([...newZones]);
       updateItems([...items, item]);
     }
   }
