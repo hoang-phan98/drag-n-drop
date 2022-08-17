@@ -160,7 +160,23 @@ export const Playground = () => {
         .filter((dZone) => dZone.item);
 
       updateDroppableZones([...newZones]);
-      updateItems([...items, item]);
+
+      const newDraggableItemsList = [...items, item];
+
+      // Sorting the items list so that it would be based on ordinal for Hierarchies and name for Attributes
+      const hierarchyItems = newDraggableItemsList.filter(
+        (i) => i.type !== ItemType.Attribute
+      );
+
+      const attributeItems = newDraggableItemsList.filter(
+        (i) => i.type === ItemType.Attribute
+      );
+
+      hierarchyItems.sort((a, b) => (a.ordinal <= b.ordinal ? -1 : 1));
+      attributeItems.sort((a, b) =>
+        a.name.toLowerCase() <= b.name.toLowerCase() ? -1 : 1
+      );
+      updateItems([...hierarchyItems, ...attributeItems]);
     }
   }
 
