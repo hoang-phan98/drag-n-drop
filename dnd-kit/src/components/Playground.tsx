@@ -111,9 +111,10 @@ export const Playground = () => {
           items: [...foundZone.items, activeItem],
         };
 
-        const newDroppableZones = droppableZones.filter(
-          (dZone) => dZone.id !== over.id
-        );
+        const newDroppableZones = droppableZones
+          .filter((dZone) => dZone.id !== over.id)
+          .filter((dZone) => dZone.items.length !== 0);
+
         newDroppableZones.splice(foundZoneIndex, 0, newDroppedZone);
 
         updateDroppableZones([...newDroppableZones]);
@@ -177,12 +178,17 @@ export const Playground = () => {
                 ? dZone.accepts.includes(activeItem.type)
                 : false;
 
+            const style = {
+              marginLeft: `${dZoneIndex * 1.5}rem`,
+            } as React.CSSProperties;
+
             return (
               <DroppableZone
                 key={dZoneIndex}
                 zone={dZone}
                 validDropLocation={canDrop}
                 onRemove={handleRemove}
+                style={style}
               />
             );
           })}
