@@ -1,4 +1,9 @@
-import { DndContext, DragEndEvent, DragStartEvent } from "@dnd-kit/core";
+import {
+  closestCenter,
+  DndContext,
+  DragEndEvent,
+  DragStartEvent,
+} from "@dnd-kit/core";
 import { useState } from "react";
 import { DroppableContainerA } from "./DroppableContainerA";
 import { DroppableContainerB } from "./DroppableContainerB";
@@ -162,7 +167,11 @@ export const Playground = () => {
   // NOTE: have tried using onDragMove, onDragOver and onDragCancel which didn't seemed to be useful
   return (
     <div className="playground">
-      <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <DndContext
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        collisionDetection={closestCenter}
+      >
         <DroppableContainerA>
           <ItemList
             heading={"Hierarchies"}
