@@ -1,0 +1,11 @@
+.subheading {
+  padding: 0 1rem;
+  margin: 0;
+}
+
+.items {
+  list-style: none;
+  margin: 0;
+  padding: 1rem;
+  width: 14rem;
+}
