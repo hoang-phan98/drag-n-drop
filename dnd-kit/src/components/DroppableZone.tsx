@@ -17,12 +17,12 @@ export const DroppableZone = ({
   zone,
   validDropLocation,
   onRemove,
-  style
+  style,
 }: DroppableZoneProps) => {
   const { isOver, setNodeRef } = useDroppable({
     id: zone.id,
     data: {
-      accepts: zone.accepts,
+      ...zone,
     },
   });
 
@@ -33,24 +33,23 @@ export const DroppableZone = ({
         `${zone.id}`,
         validDropLocation && "valid",
         isOver && validDropLocation && "is-over",
-        { "with-children": zone.items.length > 0 }
+        { "has-item": zone.item }
       )}
-      style={{
-        ...style
-      } as React.CSSProperties}
+      style={
+        {
+          ...style,
+        } as React.CSSProperties
+      }
       ref={setNodeRef}
     >
-      {zone.items.map((item, itemIndex) => {
-        return (
-          <RemovableItem
-            key={itemIndex}
-            item={item}
-            onRemove={(item) => {
-              onRemove(item, zone);
-            }}
-          />
-        );
-      })}
+      {zone.item && (
+        <RemovableItem
+          item={zone.item}
+          onRemove={(item) => {
+            onRemove(item, zone);
+          }}
+        />
+      )}
     </div>
   );
 };

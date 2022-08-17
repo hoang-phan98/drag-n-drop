@@ -12,7 +12,7 @@ import "./Playground.css";
 export interface Zone {
   id: string;
   accepts: ItemType[];
-  items: ItemProps[];
+  item?: ItemProps;
 }
 
 export const Playground = () => {
@@ -20,20 +20,26 @@ export const Playground = () => {
 
   const [items, updateItems] = useState<ItemProps[]>([
     {
-      id: "draggable-segment-item",
+      id: uuidv4(),
       name: "Segment",
       type: ItemType.Hierarchy,
       ordinal: 90,
     },
     {
-      id: "draggable-product-item",
+      id: uuidv4(),
       name: "Product",
       type: ItemType.Leaf,
       ordinal: 100,
     },
     {
-      id: "draggable-brand-item",
+      id: uuidv4(),
       name: "Brand",
+      type: ItemType.Attribute,
+      ordinal: -1,
+    },
+    {
+      id: uuidv4(),
+      name: "Variant",
       type: ItemType.Attribute,
       ordinal: -1,
     },
@@ -56,7 +62,7 @@ export const Playground = () => {
           newDroppableZones.push({
             id: uuidv4(),
             accepts: [_activeItem.type],
-            items: [],
+            item: undefined,
           });
         });
 
@@ -75,7 +81,7 @@ export const Playground = () => {
             {
               id: `droppable-${_activeItem.name.toLowerCase()}-zone`,
               accepts: [_activeItem.type],
-              items: [],
+              item: undefined,
             },
           ]);
         } else {
@@ -83,7 +89,7 @@ export const Playground = () => {
             {
               id: `droppable-${_activeItem.name.toLowerCase()}-zone`,
               accepts: [_activeItem.type],
-              items: [],
+              item: undefined,
             },
           ]);
         }
@@ -93,12 +99,14 @@ export const Playground = () => {
 
   function handleDragEnd(event: DragEndEvent) {
     const { over } = event;
-    if (
+    const canDrop =
       activeItem &&
       over &&
       over.data.current &&
-      over.data.current.accepts.includes(activeItem.type)
-    ) {
+      over.data.current.accepts.includes(activeItem.type) &&
+      !over.data.current.item;
+
+    if (canDrop) {
       // Adding item into the dropzone items list
       const foundZone = droppableZones.find((dZone) => dZone.id === over.id);
       const foundZoneIndex = droppableZones.findIndex(
@@ -108,12 +116,12 @@ export const Playground = () => {
       if (foundZone) {
         const newDroppedZone = {
           ...foundZone,
-          items: [...foundZone.items, activeItem],
+          item: activeItem,
         };
 
         const newDroppableZones = droppableZones
           .filter((dZone) => dZone.id !== over.id)
-          .filter((dZone) => dZone.items.length !== 0);
+          .filter((dZone) => dZone.item);
 
         newDroppableZones.splice(foundZoneIndex, 0, newDroppedZone);
 
@@ -132,9 +140,7 @@ export const Playground = () => {
       // This is where we are assuming item did not get dropped over the dropzones
       setActiveItem(null);
       // Filter out all empty zones
-      const newDroppableZones = droppableZones.filter(
-        (dZone) => dZone.items.length !== 0
-      );
+      const newDroppableZones = droppableZones.filter((dZone) => dZone.item);
       updateDroppableZones(newDroppableZones);
     }
   }
@@ -146,7 +152,7 @@ export const Playground = () => {
     if (foundZone) {
       const newZones = droppableZones
         .filter((dZone) => dZone.id !== zone.id)
-        .filter((dZone) => dZone.items.length !== 0);
+        .filter((dZone) => dZone.item);
 
       updateDroppableZones([...newZones]);
       updateItems([...items, item]);
@@ -175,7 +181,7 @@ export const Playground = () => {
           {droppableZones.map((dZone, dZoneIndex) => {
             const canDrop =
               activeItem && activeItem.type
-                ? dZone.accepts.includes(activeItem.type)
+                ? dZone.accepts.includes(activeItem.type) && !dZone.item
                 : false;
 
             const style = {
