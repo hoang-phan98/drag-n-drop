@@ -5,9 +5,11 @@ import "./ItemList.css";
 export interface ItemListProps {
   heading: string;
   items: ItemProps[];
+  setIsDragging: (isDragging: boolean) => void;
 }
 
-export const ItemList = ({ heading, items }: ItemListProps) => {
+export const ItemList = ({ heading, items, setIsDragging }: ItemListProps) => {
+  console.log(items);
   return (
     <div>
       <h2 className="subheading">{heading}</h2>
@@ -15,7 +17,7 @@ export const ItemList = ({ heading, items }: ItemListProps) => {
         {items.map((item, itemIndex) => {
           return (
             <li key={itemIndex}>
-              <DraggableItem item={item} />
+              <DraggableItem setIsDragging={setIsDragging} item={item} />
             </li>
           );
         })}
