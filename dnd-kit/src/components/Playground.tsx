@@ -240,6 +240,7 @@ export const Playground = () => {
                 zone={dZone}
                 validDropLocation={canDrop}
                 onRemove={handleRemove}
+                newEntry={dZoneIndex !== 0}
                 style={style}
               />
             );

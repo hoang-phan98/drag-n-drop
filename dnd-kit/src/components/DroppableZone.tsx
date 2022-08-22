@@ -6,10 +6,12 @@ import "./DroppableZone.css";
 import { RemovableItem } from "./RemovableItem";
 import { ItemProps } from "./Item";
 import React from "react";
+import { NewEntryIcon } from "./NewEntryIcon";
 export interface DroppableZoneProps {
   zone: Zone;
   validDropLocation: boolean;
   onRemove: (item: ItemProps, zone: Zone) => void;
+  newEntry?: boolean;
   style?: React.CSSProperties;
 }
 
@@ -17,6 +19,7 @@ export const DroppableZone = ({
   zone,
   validDropLocation,
   onRemove,
+  newEntry,
   style,
 }: DroppableZoneProps) => {
   const { isOver, setNodeRef } = useDroppable({
@@ -43,12 +46,15 @@ export const DroppableZone = ({
       ref={setNodeRef}
     >
       {zone.item && (
-        <RemovableItem
-          item={zone.item}
-          onRemove={(item) => {
-            onRemove(item, zone);
-          }}
-        />
+        <>
+          {newEntry && <NewEntryIcon />}
+          <RemovableItem
+            item={zone.item}
+            onRemove={(item) => {
+              onRemove(item, zone);
+            }}
+          />
+        </>
       )}
     </div>
   );
