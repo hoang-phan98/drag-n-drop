@@ -9,9 +9,9 @@ export interface ItemProps {
   ordinal: number;
 }
 
-export const Item = ({ name }: ItemProps) => {
+export const Item = ({ name, type }: ItemProps) => {
   return (
-    <div className="item">
+    <div className="item" style={{backgroundColor: type === ItemType.Attribute  ? "lightyellow" : "none"}}>
       <span>{name}</span>
       <DragIcon />
     </div>

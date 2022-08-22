@@ -6,7 +6,9 @@ import { Item, ItemProps } from "./Item";
 export type DraggableItemProps = {
     item: ItemProps,
     setDraggingItem: (draggingItem?: ItemProps) => void,
-    useDragDependencies: ItemProps[]
+    useDragDependencies: [ItemProps[]],
+    handleDragEnd: () => void;
+    canDrag?: boolean,
 };
 
 export type DragSourceItem = {
@@ -15,22 +17,32 @@ export type DragSourceItem = {
     ordinal: number
 };
 
-export const DraggableItem = ({ item, setDraggingItem, useDragDependencies }: DraggableItemProps) => {
+export const DraggableItem = ({ item, setDraggingItem, useDragDependencies, handleDragEnd, canDrag = true }: DraggableItemProps) => {
     const [{ isDragging }, drag, dragPreview] = useDrag(() => ({
         type: item.type,
         item: { id: item.id, type: item.type, ordinal: item.ordinal } as DragSourceItem,
         collect: (monitor) => ({
             isDragging: monitor.isDragging(),
         }),
-    }), [useDragDependencies]);
+        end: (item, monitor) => {
+            // If didDrop, action will be handled by drop monitor
+            if (monitor.didDrop()) {
+                return;
+            };
+            handleDragEnd()
+        },
+        canDrag: canDrag,
+    }), useDragDependencies);
 
     useEffect(() => {
-        isDragging && console.log(`Dragging item: ${item.name}`);
-        !isDragging && console.log(`Stopped dragging item: ${item.name}`);
-        setDraggingItem(item);
-    }, [isDragging]);
+        if (isDragging) {
+            setDraggingItem(item);
+        } else {
+            setDraggingItem(undefined);
+        }
+    }, [item, isDragging]);
 
-    return isDragging 
-        ? <div ref={dragPreview} /> 
-        : <div ref={drag}> <Item {...item}/> </div>
+    return isDragging
+        ? <div ref={dragPreview} />
+        : <div ref={drag}> <Item {...item} /> </div>
 };

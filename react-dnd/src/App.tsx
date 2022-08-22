@@ -4,13 +4,13 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { DroppableContainerA } from "./components/droppable-containers/DroppableContainerA";
 import { DroppableContainerB } from "./components/droppable-containers/DroppableContainerB";
 import { ItemType } from "./components/models/ItemType";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ItemProps } from "./components/items/Item";
 import { ItemList } from "./components/items/ItemList";
 import { ZoneProps } from "./components/models/ZoneProps";
 import { DroppableZone } from "./components/droppable-zones/DroppableZone";
 import { DragSourceItem } from "./components/items/DraggableItem";
-import { v4 as uuid} from "uuid";
+import { v4 as uuid } from "uuid";
 
 const initialItems = [
   {
@@ -63,7 +63,7 @@ function App() {
   const [dropZones, setDropZones] = useState<ZoneProps[]>([initialZone]);
   const [draggingItem, setDraggingItem] = useState<ItemProps | undefined>(undefined);
   const useDropDependencies: [ItemProps[], ZoneProps[]] = [items, dropZones];
-  const useDragDependencies: ItemProps[] = items;
+  const useDragDependencies: [ItemProps[]] = [items];
 
   const handleDrop = useCallback((item: DragSourceItem, zone: ZoneProps) => {
     if (zone.item != null) {
@@ -84,6 +84,8 @@ function App() {
     const updatedZone = {
       ...zone,
       item: oldItem,
+      ordinal: item.ordinal,
+      isTemporary: false
     } as ZoneProps;
     const oldZoneIndex = dropZones.indexOf(zone);
 
@@ -91,15 +93,16 @@ function App() {
     const newZone = {
       accepts: [ItemType.Attribute, ItemType.Hierarchy, ItemType.Leaf],
       id: `droppable-zone-${uuid()}`,
-      ordinal: item.ordinal
+      ordinal: item.ordinal,
+      isTemporary: false
     } as ZoneProps;
 
     const newDropZones = Array.from(dropZones);
     newDropZones.splice(oldZoneIndex, 1, updatedZone, newZone);
 
     // Update state
-    setItems(newItems.sort((a,b) => b.ordinal - a.ordinal));
-    setDropZones(newDropZones);
+    setItems(newItems.sort((a, b) => b.ordinal - a.ordinal));
+    setDropZones(newDropZones.filter(zone => zone.item !== undefined && !zone.isTemporary));
   }, [items, dropZones]);
 
   const handleRemove = useCallback((zone: ZoneProps) => {
@@ -119,39 +122,66 @@ function App() {
     newDropZones = newDropZones.slice(0, oldZoneIndex)
     newDropZones.push({
       ...zone,
-      item: undefined
-    });
+      item: undefined,
+      ordinal: undefined
+    } as ZoneProps);
 
     // Update state
-    setItems(newItems.sort((a,b) => b.ordinal - a.ordinal));
+    setItems(newItems.sort((a, b) => b.ordinal - a.ordinal));
     setDropZones(newDropZones);
   }, [items, dropZones]);
 
-  // const generateTempZones = (item?: ItemProps) => {
-  //     if (!item) {
-  //       // Delete unused zones
-  //       return;
-  //     };
+  const handleDragStart = (item?: ItemProps) => {
+    if (!item) {
+      return;
+    };
 
-  //     const newZone = {
-  //       accepts: [ItemType.Attribute, ItemType.Hierarchy, ItemType.Leaf],
-  //       id: `droppable-zone-${uuid()}`,
-  //     } as ZoneProps;
+    // Generate temporary drop zones
+    if (item.type === ItemType.Attribute) {
+      const newDroppableZones: ZoneProps[] = [];
+      dropZones.forEach(zone => {
+        const newZone = {
+          accepts: [ItemType.Attribute, ItemType.Hierarchy, ItemType.Leaf],
+          id: `droppable-zone-${uuid()}`,
+          isTemporary: true
+        } as ZoneProps;
 
-  //     const newDroppableZones: ZoneProps[] = [];
-  //     dropZones.forEach(zone => {
-  //       if (zone.ordinal && item.ordinal < zone.ordinal) {
-  //         newDroppableZones.push(zone);
-  //         newDroppableZones.push(newZone);
-  //       };
-  //     });
+        if (zone.item) {
+          newDroppableZones.push(zone);
+          newDroppableZones.push(newZone);
+        };
+      });
 
-  //     console.log(newDroppableZones);
-  // };
+      if (newDroppableZones.length > 0) {
+        setDropZones(newDroppableZones);
+      }
 
-  // useEffect(() => {
-  //   generateTempZones(draggingItem);
-  // }, [draggingItem]);
+      // Insert new drop zone at the end if item is valid
+    } else {
+      const newDropZones = Array.from(dropZones);
+      const lastZone = dropZones[dropZones.length - 1];
+      if (lastZone && lastZone.ordinal && lastZone.ordinal > item.ordinal) {
+        const newZone = {
+          accepts: [ItemType.Attribute, ItemType.Hierarchy, ItemType.Leaf],
+          id: `droppable-zone-${uuid()}`,
+          isTemporary: true
+        } as ZoneProps;
+        newDropZones.push(newZone);
+      }
+      setDropZones(newDropZones);
+    };
+  };
+
+  // Remove temporary zones
+  const handleDragEnd = () => {
+    setDropZones(dropZones.filter(zone => !zone.isTemporary));
+  };
+
+  useEffect(() => {
+    if (draggingItem) {
+      handleDragStart(draggingItem);
+    };
+  }, [draggingItem]);
 
   return (
     <div className="app">
@@ -162,17 +192,19 @@ function App() {
       <DndProvider backend={HTML5Backend}>
         <div className="demo">
           <DroppableContainerA>
-            <ItemList 
-              heading="Hierarchy Items" 
-              items={items.filter(item => item.type !== ItemType.Attribute)} 
+            <ItemList
+              heading="Hierarchy Items"
+              items={items.filter(item => item.type !== ItemType.Attribute)}
               setDraggingItem={setDraggingItem}
               useDragDependencies={useDragDependencies}
+              handleDragEnd={handleDragEnd}
             />
-            <ItemList 
-              heading="Attribute Items" 
-              items={items.filter(item => item.type === ItemType.Attribute)} 
+            <ItemList
+              heading="Attribute Items"
+              items={items.filter(item => item.type === ItemType.Attribute)}
               setDraggingItem={setDraggingItem}
               useDragDependencies={useDragDependencies}
+              handleDragEnd={handleDragEnd}
             />
           </DroppableContainerA>
           <DroppableContainerB>
@@ -182,17 +214,19 @@ function App() {
               } as React.CSSProperties;
               return (
                 <DroppableZone
-                  key={index} 
-                  zone={dropZone} 
+                  key={index}
+                  zone={dropZone}
                   onRemove={handleRemove}
                   onDrop={handleDrop}
                   draggingItem={draggingItem}
                   setDraggingItem={setDraggingItem}
-                  dependencies={useDropDependencies}
+                  useDropDependencies={useDropDependencies}
                   useDragDependencies={useDragDependencies}
+                  handleDragEnd={handleDragEnd}
                   style={style}
                 />
-            )})}
+              )
+            })}
           </DroppableContainerB>
         </div>
       </DndProvider>

@@ -12,36 +12,40 @@ export interface DroppableZoneProps {
     onDrop: (item: DragSourceItem, zone: ZoneProps) => void;
     draggingItem?: ItemProps;
     setDraggingItem: (draggingItem?: ItemProps) => void;
-    dependencies: [ItemProps[], ZoneProps[]];
-    useDragDependencies: ItemProps[];
+    useDropDependencies: [ItemProps[], ZoneProps[]];
+    useDragDependencies: [ItemProps[]];
+    handleDragEnd: () => void;
     style?: React.CSSProperties;
 }
 
 export const DroppableZone = ({
-    zone, 
+    zone,
     onRemove,
     onDrop,
     draggingItem,
     setDraggingItem,
-    dependencies,
+    useDropDependencies,
     useDragDependencies,
+    handleDragEnd,
     style
 }: DroppableZoneProps) => {
-    const [{ isOver, canDrop }, drop] =  useDrop(() => ({
+    const [{ isOver, canDrop }, drop] = useDrop(() => ({
         accept: zone.accepts,
         collect: (monitor) => ({
             isOver: monitor.isOver(),
             canDrop: monitor.canDrop(),
         }),
         canDrop: (item: DragSourceItem) => {
-            return zone.accepts.includes(item.type) 
+            console.log(item, zone.ordinal);
+            return zone.accepts.includes(item.type)
                 && zone.item == undefined
-                && (zone.ordinal == undefined || item.ordinal < zone.ordinal);
+                && (zone.ordinal == undefined || item.ordinal <= zone.ordinal);
         },
         drop: (item: DragSourceItem) => {
             onDrop(item, zone);
         },
-    }), dependencies);
+    }), useDropDependencies);
+
 
     return (
         <div className={classNames(
@@ -50,18 +54,19 @@ export const DroppableZone = ({
             `${zone.id}`,
             isOver && canDrop && "is-over",
             { "with-children": zone.item != null }
-          )} 
-          ref={drop} 
-          style={{
-            ...style
-          } as React.CSSProperties}
+        )}
+            ref={drop}
+            style={{
+                ...style
+            } as React.CSSProperties}
         >
-            {zone.item && 
-                <RemovableItem 
+            {zone.item &&
+                <RemovableItem
                     useDragDependencies={useDragDependencies}
-                    setDraggingItem={setDraggingItem} 
-                    onRemove={() => onRemove(zone)} 
+                    setDraggingItem={setDraggingItem}
+                    onRemove={() => onRemove(zone)}
                     item={zone.item}
+                    handleDragEnd={handleDragEnd}
                 />
             }
         </div>

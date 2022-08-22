@@ -6,13 +6,20 @@ export interface RemovableItemProps {
   item: ItemProps;
   onRemove: (item: ItemProps) => void;
   setDraggingItem: (draggingItem?: ItemProps) => void;
-  useDragDependencies: ItemProps[];
+  useDragDependencies: [ItemProps[]];
+  handleDragEnd: () => void;
 }
 
-export const RemovableItem = ({ item, onRemove, setDraggingItem, useDragDependencies }: RemovableItemProps) => {
+export const RemovableItem = ({ item, onRemove, setDraggingItem, useDragDependencies, handleDragEnd }: RemovableItemProps) => {
   return (
     <div className="removable-item">
-      <DraggableItem setDraggingItem={setDraggingItem} item={item} useDragDependencies={useDragDependencies}/>
+      <DraggableItem
+        setDraggingItem={setDraggingItem}
+        item={item}
+        useDragDependencies={useDragDependencies}
+        handleDragEnd={handleDragEnd}
+        canDrag={false}
+      />
       <button className="removable-item-btn" onClick={() => onRemove(item)}>
         <RemoveIcon />
       </button>

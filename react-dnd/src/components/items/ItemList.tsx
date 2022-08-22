@@ -6,10 +6,11 @@ export interface ItemListProps {
   heading: string;
   items: ItemProps[];
   setDraggingItem: (draggingItem?: ItemProps) => void;
-  useDragDependencies: ItemProps[]
+  useDragDependencies: [ItemProps[]],
+  handleDragEnd: () => void;
 }
 
-export const ItemList = ({ heading, items, setDraggingItem, useDragDependencies }: ItemListProps) => {
+export const ItemList = ({ heading, items, setDraggingItem, useDragDependencies, handleDragEnd }: ItemListProps) => {
   return (
     <div>
       <h2 className="subheading">{heading}</h2>
@@ -17,7 +18,12 @@ export const ItemList = ({ heading, items, setDraggingItem, useDragDependencies 
         {items.map((item, itemIndex) => {
           return (
             <li key={itemIndex}>
-              <DraggableItem setDraggingItem={setDraggingItem} item={item} useDragDependencies={useDragDependencies}/>
+              <DraggableItem
+                setDraggingItem={setDraggingItem}
+                item={item}
+                useDragDependencies={useDragDependencies}
+                handleDragEnd={handleDragEnd}
+              />
             </li>
           );
         })}
