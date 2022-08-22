@@ -77,22 +77,31 @@ export const Playground = () => {
         });
 
         updateDroppableZones([...newDroppableZones]);
+        return;
       } else {
         // Assuming we're dropping Hierarchy/Root/Leaf nodes
-        const isFound = droppableZones.filter((dZone) =>
-          dZone.id === _activeItem.id
+        const isFound = droppableZones.filter(
+          (dZone) => dZone.id === _activeItem.id
         );
 
         // When no matching zones were found add one
-        // TODO probably should take into account where we want to inject the new zone based on ordinal
         if (isFound.length === 0) {
-          updateDroppableZones([
-            ...droppableZones,
-            {
-              id: _activeItem.id,
-              accepts: [_activeItem.type],
-            },
-          ]);
+          const index = droppableZones.findIndex(
+            (dZone) => dZone.item && dZone.item.ordinal > _activeItem.ordinal
+          );
+
+          // Case where no ordinal is greater, then we add to the end
+          if (index < 0) {
+            updateDroppableZones([
+              ...droppableZones,
+              {
+                id: _activeItem.id,
+                accepts: [_activeItem.type],
+              },
+            ]);
+
+            return;
+          }
         } else {
           updateDroppableZones([
             {
@@ -100,6 +109,8 @@ export const Playground = () => {
               accepts: [_activeItem.type],
             },
           ]);
+
+          return;
         }
       }
     }
@@ -128,13 +139,14 @@ export const Playground = () => {
           item: activeItem,
         };
 
-        const newDroppableZones = droppableZones
-          .filter((dZone) => dZone.id !== over.id)
-          .filter((dZone) => dZone.item);
-
+        // Make a copy and inject new zone
+        const newDroppableZones = droppableZones.map((d) => d);
         newDroppableZones.splice(foundZoneIndex, 0, newDroppedZone);
 
-        updateDroppableZones([...newDroppableZones]);
+        // Update droppable zones and filter out any empty zones
+        updateDroppableZones([
+          ...newDroppableZones.filter((dZone) => dZone.item),
+        ]);
 
         // Removing item from items list
         const newDraggableItemsList = items.filter(
