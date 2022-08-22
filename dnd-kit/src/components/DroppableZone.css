@@ -1,0 +1,20 @@
+.droppable-zone {
+  height: 0.25rem;
+  width: 12.125rem;
+  border-radius: 0.188rem;
+}
+
+.droppable-zone.valid {
+  background-color: #d3dcea;
+  margin-bottom: 1rem;
+}
+
+.is-over {
+  height: 2rem;
+}
+
+.droppable-zone.has-item {
+  display: flex;
+  height: auto;
+  margin-bottom: 0;
+}
