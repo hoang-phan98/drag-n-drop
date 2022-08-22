@@ -87,7 +87,6 @@ export const Playground = () => {
               accepts: [_activeItem.type],
             },
           ]);
-
           return;
         }
 
@@ -104,18 +103,58 @@ export const Playground = () => {
 
           // Case where no ordinal is greater, then we should loop through all existing droppable zones and add an area
           if (index < 0) {
-            const newDroppableZones: Zone[] = [];
-            droppableZones.forEach((dZone) => {
-              newDroppableZones.push(dZone);
-              newDroppableZones.push({
-                id: uuidv4(),
-                accepts: [_activeItem.type],
-              });
-            });
+            // Find last index of HierarchyItem and start looping and adding droppable zones from there
+            // NOTE: array.findLast doesn't work here???
+            let reversedDroppableZones = droppableZones.map((d) => d);
+            reversedDroppableZones.reverse();
+            const lastHierarchyIndex = reversedDroppableZones.findIndex(
+              (dZone) =>
+                dZone.item &&
+                dZone.item.type === ItemType.Hierarchy &&
+                dZone.item.ordinal < _activeItem.ordinal
+            );
 
+            if (lastHierarchyIndex < 0) {
+              // Assume non was found, appending to end of list
+              updateDroppableZones([
+                ...droppableZones,
+                {
+                  id: _activeItem.id,
+                  accepts: [_activeItem.type],
+                },
+              ]);
+              return;
+            }
+
+            // Need to subtrack position from the reversed index from droppableZones length - 1
+            const injectionIndex =
+              droppableZones.length - lastHierarchyIndex - 1;
+
+            const newDroppableZones: Zone[] = [];
+            droppableZones.forEach((dZone, dZoneIndex) => {
+              newDroppableZones.push(dZone);
+
+              if (dZoneIndex >= injectionIndex) {
+                newDroppableZones.push({
+                  id: uuidv4(),
+                  accepts: [_activeItem.type],
+                });
+              }
+            });
+            
             updateDroppableZones([...newDroppableZones]);
             return;
           }
+
+          // Case where there are ordinal greater than draggable item
+          const newDroppableZones = droppableZones.map(d => d);
+          newDroppableZones.splice(index, 0, {
+            id: _activeItem.id,
+            accepts: [_activeItem.type],
+          });
+
+          updateDroppableZones([...newDroppableZones]);
+          return;
         }
       }
     }
