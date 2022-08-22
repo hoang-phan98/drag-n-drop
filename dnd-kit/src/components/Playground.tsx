@@ -79,6 +79,18 @@ export const Playground = () => {
         updateDroppableZones([...newDroppableZones]);
         return;
       } else {
+        // When no droppable zones exist yet
+        if (droppableZones.length === 0) {
+          updateDroppableZones([
+            {
+              id: _activeItem.id,
+              accepts: [_activeItem.type],
+            },
+          ]);
+
+          return;
+        }
+
         // Assuming we're dropping Hierarchy/Root/Leaf nodes
         const isFound = droppableZones.filter(
           (dZone) => dZone.id === _activeItem.id
@@ -90,27 +102,20 @@ export const Playground = () => {
             (dZone) => dZone.item && dZone.item.ordinal > _activeItem.ordinal
           );
 
-          // Case where no ordinal is greater, then we add to the end
+          // Case where no ordinal is greater, then we should loop through all existing droppable zones and add an area
           if (index < 0) {
-            updateDroppableZones([
-              ...droppableZones,
-              {
-                id: _activeItem.id,
+            const newDroppableZones: Zone[] = [];
+            droppableZones.forEach((dZone) => {
+              newDroppableZones.push(dZone);
+              newDroppableZones.push({
+                id: uuidv4(),
                 accepts: [_activeItem.type],
-              },
-            ]);
+              });
+            });
 
+            updateDroppableZones([...newDroppableZones]);
             return;
           }
-        } else {
-          updateDroppableZones([
-            {
-              id: _activeItem.id,
-              accepts: [_activeItem.type],
-            },
-          ]);
-
-          return;
         }
       }
     }
