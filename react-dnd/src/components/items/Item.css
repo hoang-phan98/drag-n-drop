@@ -1,0 +1,20 @@
+.item {
+  border: 1px solid #c3c3c3;
+  border-radius: 3px;
+  width: 12.125rem;
+  height: 2rem;
+  line-height: 1.5rem;
+  text-align: left;
+  padding: 0.25rem 0.5rem;
+  color: #646464;
+  background-color: white;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.item .drag-icon {
+  align-self: flex-end;
+}
