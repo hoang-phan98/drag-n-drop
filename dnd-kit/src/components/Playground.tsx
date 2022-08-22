@@ -26,6 +26,12 @@ export const Playground = () => {
   const [items, updateItems] = useState<ItemProps[]>([
     {
       id: uuidv4(),
+      name: "SubCategory",
+      type: ItemType.Hierarchy,
+      ordinal: 80,
+    },
+    {
+      id: uuidv4(),
       name: "Segment",
       type: ItemType.Hierarchy,
       ordinal: 90,
@@ -67,7 +73,6 @@ export const Playground = () => {
           newDroppableZones.push({
             id: uuidv4(),
             accepts: [_activeItem.type],
-            item: undefined,
           });
         });
 
@@ -75,7 +80,7 @@ export const Playground = () => {
       } else {
         // Assuming we're dropping Hierarchy/Root/Leaf nodes
         const isFound = droppableZones.filter((dZone) =>
-          dZone.accepts.includes(_activeItem.type)
+          dZone.id === _activeItem.id
         );
 
         // When no matching zones were found add one
@@ -84,17 +89,15 @@ export const Playground = () => {
           updateDroppableZones([
             ...droppableZones,
             {
-              id: `droppable-${_activeItem.name.toLowerCase()}-zone`,
+              id: _activeItem.id,
               accepts: [_activeItem.type],
-              item: undefined,
             },
           ]);
         } else {
           updateDroppableZones([
             {
-              id: `droppable-${_activeItem.name.toLowerCase()}-zone`,
+              id: _activeItem.id,
               accepts: [_activeItem.type],
-              item: undefined,
             },
           ]);
         }
@@ -112,7 +115,7 @@ export const Playground = () => {
       !over.data.current.item;
 
     if (canDrop) {
-      // Adding item into the dropzone items list
+      // Adding item into the dropzone
       const foundZone = droppableZones.find((dZone) => dZone.id === over.id);
       const foundZoneIndex = droppableZones.findIndex(
         (dZone) => dZone.id === over.id
@@ -121,6 +124,7 @@ export const Playground = () => {
       if (foundZone) {
         const newDroppedZone = {
           ...foundZone,
+          id: activeItem.id,
           item: activeItem,
         };
 
