@@ -1,15 +1,15 @@
-import { DraggableItem } from "./DraggableItem";
+import { DraggableItem, DragSourceItem } from "./DraggableItem";
 import { ItemProps } from "./Item";
 import "./ItemList.css";
 
 export interface ItemListProps {
   heading: string;
   items: ItemProps[];
-  setIsDragging: (isDragging: boolean) => void;
+  setDraggingItem: (draggingItem?: ItemProps) => void;
+  useDragDependencies: ItemProps[]
 }
 
-export const ItemList = ({ heading, items, setIsDragging }: ItemListProps) => {
-  console.log(items);
+export const ItemList = ({ heading, items, setDraggingItem, useDragDependencies }: ItemListProps) => {
   return (
     <div>
       <h2 className="subheading">{heading}</h2>
@@ -17,7 +17,7 @@ export const ItemList = ({ heading, items, setIsDragging }: ItemListProps) => {
         {items.map((item, itemIndex) => {
           return (
             <li key={itemIndex}>
-              <DraggableItem setIsDragging={setIsDragging} item={item} />
+              <DraggableItem setDraggingItem={setDraggingItem} item={item} useDragDependencies={useDragDependencies}/>
             </li>
           );
         })}

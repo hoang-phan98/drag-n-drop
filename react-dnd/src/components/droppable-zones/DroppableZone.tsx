@@ -3,16 +3,17 @@ import { ItemProps } from "../items/Item";
 import { ZoneProps } from "../models/ZoneProps";
 import classNames from "classnames";
 import "./DroppableZone.css";
-import { DraggableItem, DragSourceItem } from "../items/DraggableItem";
+import { DragSourceItem } from "../items/DraggableItem";
 import { RemovableItem } from "../items/RemovableItem";
-import { ItemType } from "../models/ItemType";
 
 export interface DroppableZoneProps {
     zone: ZoneProps;
     onRemove: (zone: ZoneProps) => void;
     onDrop: (item: DragSourceItem, zone: ZoneProps) => void;
-    isDragging: boolean;
-    setIsDragging: (isDragging: boolean) => void;
+    draggingItem?: ItemProps;
+    setDraggingItem: (draggingItem?: ItemProps) => void;
+    dependencies: [ItemProps[], ZoneProps[]];
+    useDragDependencies: ItemProps[];
     style?: React.CSSProperties;
 }
 
@@ -20,8 +21,10 @@ export const DroppableZone = ({
     zone, 
     onRemove,
     onDrop,
-    isDragging,
-    setIsDragging,
+    draggingItem,
+    setDraggingItem,
+    dependencies,
+    useDragDependencies,
     style
 }: DroppableZoneProps) => {
     const [{ isOver, canDrop }, drop] =  useDrop(() => ({
@@ -31,18 +34,19 @@ export const DroppableZone = ({
             canDrop: monitor.canDrop(),
         }),
         canDrop: (item: DragSourceItem) => {
-            return zone.accepts.includes(item.type) && zone.item == null;
+            return zone.accepts.includes(item.type) 
+                && zone.item == undefined
+                && (zone.ordinal == undefined || item.ordinal < zone.ordinal);
         },
         drop: (item: DragSourceItem) => {
-            console.log(item, zone);
             onDrop(item, zone);
         },
-    }));
+    }), dependencies);
 
     return (
         <div className={classNames(
             "droppable-zone",
-            isDragging && canDrop && "valid",
+            draggingItem && canDrop && "valid",
             `${zone.id}`,
             isOver && canDrop && "is-over",
             { "with-children": zone.item != null }
@@ -54,7 +58,8 @@ export const DroppableZone = ({
         >
             {zone.item && 
                 <RemovableItem 
-                    setIsDragging={setIsDragging} 
+                    useDragDependencies={useDragDependencies}
+                    setDraggingItem={setDraggingItem} 
                     onRemove={() => onRemove(zone)} 
                     item={zone.item}
                 />

@@ -4,5 +4,6 @@ import { ItemType } from "./ItemType";
 export type ZoneProps = {
     accepts: ItemType[],
     id: string,
-    item: ItemProps | null
+    ordinal?: number,
+    item?: ItemProps
 };

@@ -4,12 +4,13 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { DroppableContainerA } from "./components/droppable-containers/DroppableContainerA";
 import { DroppableContainerB } from "./components/droppable-containers/DroppableContainerB";
 import { ItemType } from "./components/models/ItemType";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { ItemProps } from "./components/items/Item";
 import { ItemList } from "./components/items/ItemList";
 import { ZoneProps } from "./components/models/ZoneProps";
 import { DroppableZone } from "./components/droppable-zones/DroppableZone";
 import { DragSourceItem } from "./components/items/DraggableItem";
+import { v4 as uuid} from "uuid";
 
 const initialItems = [
   {
@@ -54,16 +55,17 @@ const initialItems = [
 // This grows as more items are dropped
 const initialZone = {
   accepts: [ItemType.Hierarchy, ItemType.Leaf],
-  id: "droppable-zone-0",
-  item: null,
+  id: `droppable-zone-${uuid()}`,
 } as ZoneProps;
 
 function App() {
   const [items, setItems] = useState<ItemProps[]>(initialItems);
   const [dropZones, setDropZones] = useState<ZoneProps[]>([initialZone]);
-  const [isDragging, setIsDragging] = useState(true);
+  const [draggingItem, setDraggingItem] = useState<ItemProps | undefined>(undefined);
+  const useDropDependencies: [ItemProps[], ZoneProps[]] = [items, dropZones];
+  const useDragDependencies: ItemProps[] = items;
 
-  const handleDrop = (item: DragSourceItem, zone: ZoneProps) => {
+  const handleDrop = useCallback((item: DragSourceItem, zone: ZoneProps) => {
     if (zone.item != null) {
       return;
     }
@@ -71,7 +73,6 @@ function App() {
     // Remove item from list
     const oldItem = items.find(i => i.id == item.id);
     const newItems = items.filter(i => i.id != item.id);
-    console.log(newItems.filter(i => i.type != ItemType.Attribute));
 
     // item not found
     if (oldItem == null) {
@@ -82,50 +83,75 @@ function App() {
     // Add item to drop zone
     const updatedZone = {
       ...zone,
-      item: oldItem
-    };
+      item: oldItem,
+    } as ZoneProps;
     const oldZoneIndex = dropZones.indexOf(zone);
 
     // Create new drop zone
     const newZone = {
       accepts: [ItemType.Attribute, ItemType.Hierarchy, ItemType.Leaf],
-      id: `droppable-zone-${dropZones.length}`,
-      item: null
-    };
+      id: `droppable-zone-${uuid()}`,
+      ordinal: item.ordinal
+    } as ZoneProps;
 
     const newDropZones = Array.from(dropZones);
     newDropZones.splice(oldZoneIndex, 1, updatedZone, newZone);
 
     // Update state
-    setItems(newItems);
+    setItems(newItems.sort((a,b) => b.ordinal - a.ordinal));
     setDropZones(newDropZones);
-  };
+  }, [items, dropZones]);
 
-  const handleRemove = (zone: ZoneProps) => {
+  const handleRemove = useCallback((zone: ZoneProps) => {
     const newItems = Array.from(items);
     let newDropZones = Array.from(dropZones);
 
-    // Remove item from drop zone
     const oldZoneIndex = dropZones.indexOf(zone);
 
-    for (let i=oldZoneIndex; i<dropZones.length; i++) {
-      let zone = dropZones[i];
-      let item = zone.item;
-      // Add item back to list
-      if (item != null) newItems.push(item);
-    };
+    // Add items back to list
+    dropZones.slice(oldZoneIndex).forEach(zone => {
+      if (zone.item != null) {
+        newItems.push(zone.item);
+      };
+    });
 
+    // Remove zones
     newDropZones = newDropZones.slice(0, oldZoneIndex)
-    
     newDropZones.push({
       ...zone,
-      item: null
+      item: undefined
     });
 
     // Update state
-    setItems(newItems);
+    setItems(newItems.sort((a,b) => b.ordinal - a.ordinal));
     setDropZones(newDropZones);
-  };
+  }, [items, dropZones]);
+
+  // const generateTempZones = (item?: ItemProps) => {
+  //     if (!item) {
+  //       // Delete unused zones
+  //       return;
+  //     };
+
+  //     const newZone = {
+  //       accepts: [ItemType.Attribute, ItemType.Hierarchy, ItemType.Leaf],
+  //       id: `droppable-zone-${uuid()}`,
+  //     } as ZoneProps;
+
+  //     const newDroppableZones: ZoneProps[] = [];
+  //     dropZones.forEach(zone => {
+  //       if (zone.ordinal && item.ordinal < zone.ordinal) {
+  //         newDroppableZones.push(zone);
+  //         newDroppableZones.push(newZone);
+  //       };
+  //     });
+
+  //     console.log(newDroppableZones);
+  // };
+
+  // useEffect(() => {
+  //   generateTempZones(draggingItem);
+  // }, [draggingItem]);
 
   return (
     <div className="app">
@@ -136,8 +162,18 @@ function App() {
       <DndProvider backend={HTML5Backend}>
         <div className="demo">
           <DroppableContainerA>
-            <ItemList heading="Hierarchy Items" items={items.filter(item => item.type !== ItemType.Attribute)} setIsDragging={setIsDragging}/>
-            <ItemList heading="Attribute Items" items={items.filter(item => item.type === ItemType.Attribute)} setIsDragging={setIsDragging}/>
+            <ItemList 
+              heading="Hierarchy Items" 
+              items={items.filter(item => item.type !== ItemType.Attribute)} 
+              setDraggingItem={setDraggingItem}
+              useDragDependencies={useDragDependencies}
+            />
+            <ItemList 
+              heading="Attribute Items" 
+              items={items.filter(item => item.type === ItemType.Attribute)} 
+              setDraggingItem={setDraggingItem}
+              useDragDependencies={useDragDependencies}
+            />
           </DroppableContainerA>
           <DroppableContainerB>
             {dropZones.map((dropZone, index) => {
@@ -150,8 +186,10 @@ function App() {
                   zone={dropZone} 
                   onRemove={handleRemove}
                   onDrop={handleDrop}
-                  isDragging={isDragging}
-                  setIsDragging={setIsDragging}
+                  draggingItem={draggingItem}
+                  setDraggingItem={setDraggingItem}
+                  dependencies={useDropDependencies}
+                  useDragDependencies={useDragDependencies}
                   style={style}
                 />
             )})}
