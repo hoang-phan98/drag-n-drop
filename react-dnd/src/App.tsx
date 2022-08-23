@@ -71,11 +71,11 @@ function App() {
     }
 
     // Remove item from list
-    const oldItem = items.find(i => i.id == item.id);
+    const oldItem = items.find(i => i.id === item.id);
     const newItems = items.filter(i => i.id != item.id);
 
     // item not found
-    if (oldItem == null) {
+    if (oldItem === null) {
       console.log(`Item does not exist: ${item.id}`)
       return;
     };
