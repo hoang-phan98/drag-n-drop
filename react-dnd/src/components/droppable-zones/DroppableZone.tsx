@@ -22,7 +22,6 @@ export const DroppableZone = ({
     zone,
     onRemove,
     onDrop,
-    draggingItem,
     setDraggingItem,
     useDropDependencies,
     useDragDependencies,
@@ -36,21 +35,19 @@ export const DroppableZone = ({
             canDrop: monitor.canDrop(),
         }),
         canDrop: (item: DragSourceItem) => {
-            console.log(item, zone.ordinal);
             return zone.accepts.includes(item.type)
-                && zone.item == undefined
-                && (zone.ordinal == undefined || item.ordinal <= zone.ordinal);
+                && zone.item === undefined
+                && (zone.ordinal === undefined || item.ordinal <= zone.ordinal);
         },
         drop: (item: DragSourceItem) => {
             onDrop(item, zone);
         },
     }), useDropDependencies);
 
-
     return (
         <div className={classNames(
             "droppable-zone",
-            draggingItem && canDrop && "valid",
+            canDrop && "valid",
             `${zone.id}`,
             isOver && canDrop && "is-over",
             { "with-children": zone.item != null }

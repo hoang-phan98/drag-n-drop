@@ -36,11 +36,13 @@ export const DraggableItem = ({ item, setDraggingItem, useDragDependencies, hand
 
     useEffect(() => {
         if (isDragging) {
+            console.log(`Started dragging item: ${item.name}`)
             setDraggingItem(item);
         } else {
+            console.log(`Stopped dragging item: ${item.name}`)
             setDraggingItem(undefined);
         }
-    }, [item, isDragging]);
+    }, [isDragging]);
 
     return isDragging
         ? <div ref={dragPreview} />
