@@ -5,8 +5,10 @@ import classNames from "classnames";
 import "./DroppableZone.css";
 import { DragSourceItem } from "../items/DraggableItem";
 import { RemovableItem } from "../items/RemovableItem";
+import { NewEntryIcon } from "./NewEntryIcon";
 
 export interface DroppableZoneProps {
+    newEntry: boolean;
     zone: ZoneProps;
     onRemove: (zone: ZoneProps) => void;
     onDrop: (item: DragSourceItem, zone: ZoneProps) => void;
@@ -19,6 +21,7 @@ export interface DroppableZoneProps {
 }
 
 export const DroppableZone = ({
+    newEntry,
     zone,
     onRemove,
     onDrop,
@@ -57,6 +60,7 @@ export const DroppableZone = ({
                 ...style
             } as React.CSSProperties}
         >
+            {newEntry && zone.item && <NewEntryIcon />}
             {zone.item &&
                 <RemovableItem
                     useDragDependencies={useDragDependencies}

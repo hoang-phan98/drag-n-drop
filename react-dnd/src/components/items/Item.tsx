@@ -11,7 +11,7 @@ export interface ItemProps {
 
 export const Item = ({ name, type }: ItemProps) => {
   return (
-    <div className="item" style={{backgroundColor: type === ItemType.Attribute  ? "lightyellow" : "none"}}>
+    <div className="item">
       <span>{name}</span>
       <DragIcon />
     </div>

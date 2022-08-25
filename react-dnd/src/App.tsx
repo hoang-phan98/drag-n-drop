@@ -49,6 +49,18 @@ const initialItems = [
     type: ItemType.Attribute,
     ordinal: -1,
   },
+  {
+    id: "draggable-variant-item",
+    name: "Variant",
+    type: ItemType.Attribute,
+    ordinal: -1,
+  },
+  {
+    id: "draggable-supplier-item",
+    name: "Supplier",
+    type: ItemType.Attribute,
+    ordinal: -1,
+  },
 ];
 
 // Initially there's only one droppable zone.
@@ -160,7 +172,9 @@ function App() {
     } else {
       const newDropZones = Array.from(dropZones);
       const lastZone = dropZones[dropZones.length - 1];
-      if (lastZone && lastZone.ordinal && lastZone.ordinal > item.ordinal) {
+      if (lastZone &&
+        (lastZone.item?.type === ItemType.Attribute ||
+          (lastZone.ordinal && lastZone.ordinal > item.ordinal))) {
         const newZone = {
           accepts: [ItemType.Attribute, ItemType.Hierarchy, ItemType.Leaf],
           id: `droppable-zone-${uuid()}`,
@@ -215,6 +229,7 @@ function App() {
               return (
                 <DroppableZone
                   key={index}
+                  newEntry={index > 0}
                   zone={dropZone}
                   onRemove={handleRemove}
                   onDrop={handleDrop}
